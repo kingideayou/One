@@ -1,8 +1,6 @@
 package me.next.one.home.view;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
@@ -10,15 +8,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import me.next.one.R;
+import me.next.one.base.BaseFragment;
+import me.next.one.home.model.HomeModel;
+import me.next.one.home.presenter.HomeDataPresenter;
 
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends BaseFragment implements IHomeView {
 
-    private List<Integer> mList = new ArrayList<>();
+    private boolean isLoding = false;
+
+    private int recyclerViewSize = 0;
+    private int currentVisibleItemPosition = 0;
+
+    private RecyclerView mRecyclerView;
+    private HomeCardAdapter mHomeCardAdapter;
+    private HomeDataPresenter mHomeDataPresenter;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -34,31 +39,24 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        init(view);
-
+    protected int getLayoutResId() {
+        return R.layout.fragment_home;
     }
 
-    private void init(View view) {
-        for (int i = 0; i < 7; i++) {
-            mList.add(R.drawable.pic1);
-            mList.add(R.drawable.pic2);
-        }
+    @Override
+    protected void initView(View view, Bundle savedInstance) {
 
-        RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
                 view.getContext(),
                 LinearLayoutManager.HORIZONTAL,
                 false);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(new HomeCardAdapter(mList));
 
         LinearSnapHelper snapHelper = new LinearSnapHelper() {
             @Override
@@ -90,6 +88,43 @@ public class HomeFragment extends Fragment {
             }
         };
         snapHelper.attachToRecyclerView(mRecyclerView);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!isLoding &&  RecyclerView.SCROLL_STATE_IDLE == newState) {
+                    recyclerViewSize = linearLayoutManager.getItemCount();
+                    currentVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+                    if (recyclerViewSize - currentVisibleItemPosition >= 1) {
+                        isLoding = true;
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void initData() {
+        mHomeDataPresenter = new HomeDataPresenter(this);
+        mHomeDataPresenter.initDatas();
+        mHomeCardAdapter = new HomeCardAdapter();
+        mRecyclerView.setAdapter(mHomeCardAdapter);
+    }
+
+    @Override
+    public void onLoadDone(boolean result, HomeModel homeModel) {
+        if (result) {
+            mHomeCardAdapter.appendData(homeModel);
+        }
+    }
+
+    @Override
+    public void onInitializeDone(boolean result, HomeModel homeModel) {
+        if (result) {
+            mHomeCardAdapter.initData(homeModel);
+            mHomeDataPresenter.loadDatas(1);
+        }
     }
 
 }

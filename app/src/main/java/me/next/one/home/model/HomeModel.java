@@ -128,4 +128,22 @@ public class HomeModel {
     public void setWImgUrl(String wImgUrl) {
         this.wImgUrl = wImgUrl;
     }
+
+    @Override
+    public String toString() {
+        return "HomeModel{" +
+                "strLastUpdateDate='" + strLastUpdateDate + '\'' +
+                ", strDayDiffer='" + strDayDiffer + '\'' +
+                ", strHpId='" + strHpId + '\'' +
+                ", strHpTitle='" + strHpTitle + '\'' +
+                ", strThumbnailUrl='" + strThumbnailUrl + '\'' +
+                ", strOriginalImgUrl='" + strOriginalImgUrl + '\'' +
+                ", strAuthor='" + strAuthor + '\'' +
+                ", strContent='" + strContent + '\'' +
+                ", strMarketTime='" + strMarketTime + '\'' +
+                ", sWebLk='" + sWebLk + '\'' +
+                ", strPn='" + strPn + '\'' +
+                ", wImgUrl='" + wImgUrl + '\'' +
+                '}';
+    }
 }

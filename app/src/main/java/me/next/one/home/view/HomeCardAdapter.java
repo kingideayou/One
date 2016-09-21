@@ -10,14 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.next.one.R;
+import me.next.one.home.model.HomeModel;
+import me.next.one.utils.AppLogger;
+import me.next.one.utils.ImageLoaderUtils;
 import me.next.one.utils.ToastUtils;
 
-class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.ViewHolder> {
-    private List<Integer> mList = new ArrayList<>();
+import static me.next.one.R.id.imageView;
 
-    public HomeCardAdapter(List<Integer> mList) {
-        this.mList = mList;
-    }
+class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.ViewHolder> {
+
+    private List<HomeModel> mHomeModels = new ArrayList<>();
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -27,7 +29,8 @@ class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mImageView.setImageResource(mList.get(position));
+        AppLogger.d(mHomeModels.get(position).getStrThumbnailUrl());
+        ImageLoaderUtils.loadImage(mHomeModels.get(position).getStrThumbnailUrl(), holder.mImageView);
         holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -38,7 +41,25 @@ class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return mList.size();
+        return mHomeModels.size();
+    }
+
+    public List<HomeModel> getHomeModels() {
+        return mHomeModels;
+    }
+
+    void initData(HomeModel homeModel) {
+        getHomeModels().add(homeModel);
+        notifyDataSetChanged();
+    }
+
+    void appendData(HomeModel homeModel) {
+        getHomeModels().add(homeModel);
+        notifyItemInserted(mHomeModels.size() - 1);
+    }
+
+    public void setHomeModels(List<HomeModel> homeModels) {
+        mHomeModels = homeModels;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -46,7 +67,7 @@ class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.ViewHolder> {
 
         public ViewHolder(final View itemView) {
             super(itemView);
-            mImageView = (ImageView) itemView.findViewById(R.id.imageView);
+            mImageView = (ImageView) itemView.findViewById(imageView);
         }
 
     }
