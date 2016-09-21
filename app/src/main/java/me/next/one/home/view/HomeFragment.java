@@ -96,8 +96,10 @@ public class HomeFragment extends BaseFragment implements IHomeView {
                 if (!isLoding &&  RecyclerView.SCROLL_STATE_IDLE == newState) {
                     recyclerViewSize = linearLayoutManager.getItemCount();
                     currentVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                    if (recyclerViewSize - currentVisibleItemPosition >= 1) {
+                    if (recyclerViewSize - currentVisibleItemPosition >= 1 &&
+                            mHomeCardAdapter.getHomeModels().size() == recyclerViewSize) {
                         isLoding = true;
+                        mHomeDataPresenter.loadDatas(recyclerViewSize);
                     }
                 }
             }
@@ -114,6 +116,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
 
     @Override
     public void onLoadDone(boolean result, HomeModel homeModel) {
+        isLoding = false;
         if (result) {
             mHomeCardAdapter.appendData(homeModel);
         }
