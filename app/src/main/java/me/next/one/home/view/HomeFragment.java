@@ -8,20 +8,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import butterknife.BindView;
 import me.next.one.R;
 import me.next.one.base.BaseFragment;
 import me.next.one.home.model.HomeModel;
+import me.next.one.home.presenter.HomeCardAdapter;
 import me.next.one.home.presenter.HomeDataPresenter;
 
 
 public class HomeFragment extends BaseFragment implements IHomeView {
 
+    @BindView(R.id.recycler_view)
+    public RecyclerView mRecyclerView;
+
     private boolean isLoding = false;
 
     private int recyclerViewSize = 0;
     private int currentVisibleItemPosition = 0;
-
-    private RecyclerView mRecyclerView;
     private HomeCardAdapter mHomeCardAdapter;
     private HomeDataPresenter mHomeDataPresenter;
 
@@ -93,11 +96,10 @@ public class HomeFragment extends BaseFragment implements IHomeView {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!isLoding &&  RecyclerView.SCROLL_STATE_IDLE == newState) {
+                if (!isLoding && RecyclerView.SCROLL_STATE_IDLE == newState) {
                     recyclerViewSize = linearLayoutManager.getItemCount();
                     currentVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                    if (recyclerViewSize - currentVisibleItemPosition >= 1 &&
-                            mHomeCardAdapter.getHomeModels().size() == recyclerViewSize) {
+                    if (recyclerViewSize < currentVisibleItemPosition + 3) {
                         isLoding = true;
                         mHomeDataPresenter.loadDatas(recyclerViewSize);
                     }
@@ -127,6 +129,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
         if (result) {
             mHomeCardAdapter.initData(homeModel);
             mHomeDataPresenter.loadDatas(1);
+            mHomeDataPresenter.loadDatas(2);
         }
     }
 
