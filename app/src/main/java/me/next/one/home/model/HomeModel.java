@@ -1,9 +1,12 @@
 package me.next.one.home.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by NeXT on 16/9/12.
  */
-public class HomeModel {
+public class HomeModel implements Parcelable {
 
     /**
      * strLastUpdateDate : 2016-09-07 14:07:35
@@ -146,4 +149,55 @@ public class HomeModel {
                 ", wImgUrl='" + wImgUrl + '\'' +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.strLastUpdateDate);
+        dest.writeString(this.strDayDiffer);
+        dest.writeString(this.strHpId);
+        dest.writeString(this.strHpTitle);
+        dest.writeString(this.strThumbnailUrl);
+        dest.writeString(this.strOriginalImgUrl);
+        dest.writeString(this.strAuthor);
+        dest.writeString(this.strContent);
+        dest.writeString(this.strMarketTime);
+        dest.writeString(this.sWebLk);
+        dest.writeString(this.strPn);
+        dest.writeString(this.wImgUrl);
+    }
+
+    public HomeModel() {
+    }
+
+    protected HomeModel(Parcel in) {
+        this.strLastUpdateDate = in.readString();
+        this.strDayDiffer = in.readString();
+        this.strHpId = in.readString();
+        this.strHpTitle = in.readString();
+        this.strThumbnailUrl = in.readString();
+        this.strOriginalImgUrl = in.readString();
+        this.strAuthor = in.readString();
+        this.strContent = in.readString();
+        this.strMarketTime = in.readString();
+        this.sWebLk = in.readString();
+        this.strPn = in.readString();
+        this.wImgUrl = in.readString();
+    }
+
+    public static final Parcelable.Creator<HomeModel> CREATOR = new Parcelable.Creator<HomeModel>() {
+        @Override
+        public HomeModel createFromParcel(Parcel source) {
+            return new HomeModel(source);
+        }
+
+        @Override
+        public HomeModel[] newArray(int size) {
+            return new HomeModel[size];
+        }
+    };
 }

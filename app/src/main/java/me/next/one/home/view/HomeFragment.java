@@ -120,7 +120,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
     protected void initData() {
         mHomeDataPresenter = new HomeDataPresenter(this);
         mHomeDataPresenter.initDatas();
-        mHomeCardAdapter = new HomeCardAdapter();
+        mHomeCardAdapter = new HomeCardAdapter(getActivity());
         mRecyclerView.setAdapter(mHomeCardAdapter);
     }
 

@@ -1,5 +1,9 @@
 package me.next.one.home.presenter;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Build;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +18,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import me.next.one.R;
 import me.next.one.home.model.HomeModel;
+import me.next.one.home.view.HomeDetailActivity;
 import me.next.one.utils.AppLogger;
 import me.next.one.utils.ImageLoaderUtils;
-import me.next.one.utils.ToastUtils;
 
 public class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.HomeViewHolder> {
+
+    private Activity mActivity;
+
+    public HomeCardAdapter(Activity activity) {
+        mActivity = activity;
+    }
 
     private List<HomeModel> mHomeModels = new ArrayList<>();
 
@@ -74,7 +84,7 @@ public class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.HomeVi
             ButterKnife.bind(this, itemView);
         }
 
-        void onBindViewHolder(HomeModel homeModel) {
+        void onBindViewHolder(final HomeModel homeModel) {
             ImageLoaderUtils.loadImage(homeModel.getStrThumbnailUrl(), imageView);
             strAuthor.setText(homeModel.getStrAuthor());
             strContent.setText(homeModel.getStrContent());
@@ -82,7 +92,20 @@ public class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.HomeVi
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ToastUtils.show(imageView.getContext(), "" + getAdapterPosition());
+                    Intent intent = new Intent(mActivity, HomeDetailActivity.class);
+                    intent.putExtra(HomeDetailActivity.EXTRA_HOME_MODEL, homeModel);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        int width = imageView.getMeasuredWidth();
+                        int height = imageView.getMeasuredHeight();
+                        intent.putExtra(HomeDetailActivity.EXTRA_IMAGE_WIDTH, width);
+                        intent.putExtra(HomeDetailActivity.EXTRA_IMAGE_HEIGHT, height);
+                        ActivityOptionsCompat options = ActivityOptionsCompat.
+                                makeSceneTransitionAnimation(mActivity, imageView, "PrimaryImage");
+                        mActivity.startActivity(intent, options.toBundle());
+                    } else {
+                        mActivity.startActivity(intent);
+                    }
                 }
             });
         }
