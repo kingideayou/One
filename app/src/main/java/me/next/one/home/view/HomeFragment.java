@@ -23,6 +23,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
 
     private boolean isLoding = false;
 
+    private static final int INIT_DATA_SIZE = 3;
     private int recyclerViewSize = 0;
     private int currentVisibleItemPosition = 0;
     private HomeCardAdapter mHomeCardAdapter;
@@ -94,16 +95,23 @@ public class HomeFragment extends BaseFragment implements IHomeView {
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (!isLoding && RecyclerView.SCROLL_STATE_IDLE == newState) {
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //滑动时进行预加载
+                if (!isLoding) {
                     recyclerViewSize = linearLayoutManager.getItemCount();
                     currentVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
-                    if (recyclerViewSize < currentVisibleItemPosition + 3) {
+                    if (recyclerViewSize < currentVisibleItemPosition + 2) {
                         isLoding = true;
-                        mHomeDataPresenter.loadDatas(recyclerViewSize);
+                        mHomeDataPresenter.loadDatas(recyclerViewSize > INIT_DATA_SIZE ? recyclerViewSize : INIT_DATA_SIZE);
                     }
                 }
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
             }
         });
     }
@@ -118,10 +126,10 @@ public class HomeFragment extends BaseFragment implements IHomeView {
 
     @Override
     public void onLoadDone(boolean result, HomeModel homeModel) {
-        isLoding = false;
         if (result) {
             mHomeCardAdapter.appendData(homeModel);
         }
+        isLoding = false;
     }
 
     @Override
