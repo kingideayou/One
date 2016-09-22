@@ -4,6 +4,8 @@ package me.next.one.utils;
  * Created by NeXT on 16/9/20.
  */
 
+import org.joda.time.DateTime;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -56,10 +58,6 @@ public class TimeUtils {
         return getTime(getCurrentTimeInLong());
     }
 
-    public static String getCurrentTimeInString(int daysBeforeToday) {
-        return getTime(getCurrentTimeInLong() - 24 * 3600 * 1000 * daysBeforeToday);
-    }
-
     /**
      * get current time in milliseconds
      *
@@ -67,5 +65,10 @@ public class TimeUtils {
      */
     public static String getCurrentTimeInString(SimpleDateFormat dateFormat) {
         return getTime(getCurrentTimeInLong(), dateFormat);
+    }
+
+    public static String getDateStringBeforeDays(int beforeDay) {
+        DateTime dateTime = new DateTime();
+        return getTime(dateTime.minusDays(beforeDay).toDate().getTime());
     }
 }

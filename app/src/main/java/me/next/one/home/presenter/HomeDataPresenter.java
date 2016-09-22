@@ -35,10 +35,12 @@ public class HomeDataPresenter implements IHomePresenter {
                 .map(new Func1<String, HomeModel>() {
                     @Override
                     public HomeModel call(String s) {
+                        String dateString = TimeUtils.getDateStringBeforeDays(daysBeforeToday);
+                        AppLogger.e("DateString : " + dateString);
                         OkHttpClientManager.Param[] params = new OkHttpClientManager.Param[2];
                         OkHttpClientManager.Param param1 =
                                 new OkHttpClientManager.Param("strDate",
-                                        TimeUtils.getCurrentTimeInString(daysBeforeToday));
+                                        dateString);
                         OkHttpClientManager.Param param2 =
                                 new OkHttpClientManager.Param("strRow", "1");
                         params[0] = param1;
