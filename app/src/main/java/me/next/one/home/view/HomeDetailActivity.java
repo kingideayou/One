@@ -18,8 +18,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.next.one.R;
 import me.next.one.home.model.HomeModel;
-import me.next.one.utils.AppLogger;
 import me.next.one.utils.ImageUtils;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class HomeDetailActivity extends AppCompatActivity {
 
@@ -73,55 +77,35 @@ public class HomeDetailActivity extends AppCompatActivity {
 
         try {
             Glide.with(this)
-                 .load(homeModel.getStrThumbnailUrl())
-                 .asBitmap().listener(new RequestListener<String, Bitmap>() {
-                     @Override
-                     public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
-                         startTransition();
-                         return false;
-                     }
+                    .load(homeModel.getStrThumbnailUrl())
+                     .asBitmap().listener(new RequestListener<String, Bitmap>() {
+                         @Override
+                         public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                             startTransition();
+                             return false;
+                         }
 
-                     @Override
-                     public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                         AppLogger.e("Dark Image : " + ImageUtils.isDark(resource));
-                         updateTextColor(ImageUtils.isDark(resource));
-                         imageView.setImageBitmap(resource);
-                         startTransition();
-                         return false;
-                     }
-                 }).into(width, height).get();
+                         @Override
+                         public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                             isBitmapDark(resource);
+                             imageView.setImageBitmap(resource);
+                             startTransition();
+                             return false;
+                         }
+                     }).into(width, height).get();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        /*
-        Glide.with(getApplicationContext()).load(homeModel.getStrThumbnailUrl()).override(width, height).listener(new RequestListener<String, GlideDrawable>() {
-            @Override
-            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                //启动共享元素 Transition
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    startPostponedEnterTransition();
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                //启动共享元素 Transition
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    startPostponedEnterTransition();
-                }
-                return false;
-            }
-           }).into(imageView);
-        */
     }
 
     private void updateTextColor(boolean dark) {
         if (dark) {
             strAuthor.setTextColor(getResources().getColor(R.color.white));
+            strAuthor.setShadowLayer(2, 2, 2, R.color.black);
             strHpTitle.setTextColor(getResources().getColor(R.color.white));
+            strHpTitle.setShadowLayer(2, 2, 2, R.color.black);
             strContent.setTextColor(getResources().getColor(R.color.white));
+            strContent.setShadowLayer(2, 2, 2, R.color.black);
         } else {
             strAuthor.setTextColor(getResources().getColor(R.color.black));
             strHpTitle.setTextColor(getResources().getColor(R.color.black));
@@ -129,6 +113,43 @@ public class HomeDetailActivity extends AppCompatActivity {
         }
     }
 
+    public void isBitmapDark(final Bitmap bitmap) {
+
+        Observable.just("")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String str) {
+                        return ImageUtils.isDark(bitmap);
+                    }
+                })
+                /*
+                .map(new Func1<Boolean, List<Integer>>() {
+                    @Override
+                    public List<Integer> call(Boolean isDark) {
+                        List<Integer> colorList = new ArrayList<>();
+                        Palette p = Palette.from(bitmap).generate();
+                        colorList.add(isDark ?
+                                p.getDarkMutedColor(getResources().getColor(R.color.black)) :
+                                p.getLightMutedColor(getResources().getColor(R.color.white)));
+                        return colorList;
+                    }
+                })
+                .subscribe(new Action1<List<Integer>>() {
+                    @Override
+                    public void call(List<Integer> integers) {
+                        updateTextColor(integers);
+                    }
+                });
+                */
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean isDark) {
+                        updateTextColor(isDark);
+                    }
+                });
+    }
 
     private void startTransition() {
         //启动共享元素 Transition
