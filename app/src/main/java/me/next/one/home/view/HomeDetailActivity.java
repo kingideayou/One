@@ -1,5 +1,6 @@
 package me.next.one.home.view;
 
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
@@ -18,6 +18,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.next.one.R;
 import me.next.one.home.model.HomeModel;
+import me.next.one.utils.AppLogger;
+import me.next.one.utils.ImageUtils;
 
 public class HomeDetailActivity extends AppCompatActivity {
 
@@ -68,6 +70,31 @@ public class HomeDetailActivity extends AppCompatActivity {
         strAuthor.setText(homeModel.getStrAuthor());
         strContent.setText(homeModel.getStrContent());
         strHpTitle.setText(homeModel.getStrHpTitle());
+
+        try {
+            Glide.with(this)
+                 .load(homeModel.getStrThumbnailUrl())
+                 .asBitmap().listener(new RequestListener<String, Bitmap>() {
+                     @Override
+                     public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                         startTransition();
+                         return false;
+                     }
+
+                     @Override
+                     public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                         AppLogger.e("Dark Image : " + ImageUtils.isDark(resource));
+                         updateTextColor(ImageUtils.isDark(resource));
+                         imageView.setImageBitmap(resource);
+                         startTransition();
+                         return false;
+                     }
+                 }).into(width, height).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        /*
         Glide.with(getApplicationContext()).load(homeModel.getStrThumbnailUrl()).override(width, height).listener(new RequestListener<String, GlideDrawable>() {
             @Override
             public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -86,7 +113,28 @@ public class HomeDetailActivity extends AppCompatActivity {
                 }
                 return false;
             }
-        }).into(imageView);
+           }).into(imageView);
+        */
+    }
+
+    private void updateTextColor(boolean dark) {
+        if (dark) {
+            strAuthor.setTextColor(getResources().getColor(R.color.white));
+            strHpTitle.setTextColor(getResources().getColor(R.color.white));
+            strContent.setTextColor(getResources().getColor(R.color.white));
+        } else {
+            strAuthor.setTextColor(getResources().getColor(R.color.black));
+            strHpTitle.setTextColor(getResources().getColor(R.color.black));
+            strContent.setTextColor(getResources().getColor(R.color.black));
+        }
+    }
+
+
+    private void startTransition() {
+        //启动共享元素 Transition
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startPostponedEnterTransition();
+        }
     }
 
     @Override
