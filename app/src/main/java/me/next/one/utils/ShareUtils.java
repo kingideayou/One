@@ -12,10 +12,9 @@ import me.next.one.R;
 
 public class ShareUtils {
 
-    public static void shareImage(Context context, Uri uriToImage, String content) {
+    public static void shareImage(Context context, Uri uriToImage) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, content);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);
         shareIntent.setType("image/jpeg");
         context.startActivity(Intent.createChooser(shareIntent, context.getResources().getText(R.string.send_to)));

@@ -202,8 +202,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String imagePath) {
-                        HomeModel homeModel = mHomeCardAdapter.getHomeModels().get(position);
-                        ShareUtils.shareImage(getContext(), Uri.parse(imagePath), homeModel.getStrContent());
+                        ShareUtils.shareImage(getContext(), Uri.parse(imagePath));
                         progressDialog.dismiss();
                     }
                 }, new Action1<Throwable>() {
