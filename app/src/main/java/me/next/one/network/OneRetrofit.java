@@ -2,6 +2,7 @@ package me.next.one.network;
 
 import me.next.one.constants.OneApi;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -16,6 +17,7 @@ public class OneRetrofit {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(OneApi.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
         oneService = retrofit.create(OneService.class);
     }

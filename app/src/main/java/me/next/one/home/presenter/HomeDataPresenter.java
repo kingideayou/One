@@ -1,16 +1,12 @@
 package me.next.one.home.presenter;
 
 import me.next.one.OneFactory;
-import me.next.one.home.model.ApiResponse;
 import me.next.one.home.model.HomeModel;
 import me.next.one.home.view.IHomeView;
-import me.next.one.utils.AppLogger;
+import me.next.one.network.OneResultFunc;
 import me.next.one.utils.TimeUtils;
-import retrofit2.Call;
-import rx.Observable;
+import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -31,40 +27,27 @@ public class HomeDataPresenter implements IHomePresenter {
 
     @Override
     public void loadDatas(final int daysBeforeToday) {
-        Observable.just("")
+        String dateString = TimeUtils.getDateStringBeforeDays(daysBeforeToday);
+        OneFactory.getOneServiceSingleton().getHomeModel(dateString, "1")
+                .map(new OneResultFunc())
                 .subscribeOn(Schedulers.io())
-                .map(new Func1<String, HomeModel>() {
-                    @Override
-                    public HomeModel call(String s) {
-                        String dateString = TimeUtils.getDateStringBeforeDays(daysBeforeToday);
-                        try {
-                            Call<ApiResponse<HomeModel>> homeModelCall = OneFactory.getOneServiceSingleton()
-                                    .getHomeModel(dateString, "1");
-                            ApiResponse<HomeModel> apiResponse = homeModelCall.execute().body();
-                            if (apiResponse.result.equals("SUCCESS")) {
-                                return apiResponse.hpEntity;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HomeModel>() {
+                .subscribe(new Observer<HomeModel>() {
                     @Override
-                    public void call(HomeModel homeModel) {
-                        AppLogger.e("homeModelList : " + homeModel.toString());
+                    public void onNext(HomeModel homeModel) {
                         finishLoad(true, homeModel, daysBeforeToday);
                     }
-                }, new Action1<Throwable>() {
+
                     @Override
-                    public void call(Throwable throwable) {
-                        AppLogger.e("Throwable : " + throwable.toString());
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
                         finishLoad(false, null, daysBeforeToday);
                     }
-                });
 
+                });
     }
 
     private void finishLoad(boolean result, HomeModel homeModel, int daysBeforeToday) {
