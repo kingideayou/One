@@ -1,19 +1,32 @@
 package me.next.one.home.view;
 
+import android.app.ProgressDialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import butterknife.BindView;
+import me.next.one.OneApplication;
 import me.next.one.R;
 import me.next.one.base.BaseFragment;
 import me.next.one.home.model.HomeModel;
 import me.next.one.home.presenter.HomeCardAdapter;
 import me.next.one.home.presenter.HomeDataPresenter;
+import me.next.one.utils.CapturePhotoUtils;
+import me.next.one.utils.ShareUtils;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 
 public class HomeFragment extends BaseFragment implements IHomeView {
@@ -28,6 +41,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
     private int currentVisibleItemPosition = 0;
     private HomeCardAdapter mHomeCardAdapter;
     private HomeDataPresenter mHomeDataPresenter;
+    private LinearLayoutManager linearLayoutManager;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -40,6 +54,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -56,7 +71,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
     protected void initView(View view, Bundle savedInstance) {
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
+        linearLayoutManager = new LinearLayoutManager(
                 view.getContext(),
                 LinearLayoutManager.HORIZONTAL,
                 false);
@@ -117,6 +132,23 @@ public class HomeFragment extends BaseFragment implements IHomeView {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                int currentVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition();
+                View currentChildView = mRecyclerView.findViewHolderForAdapterPosition(currentVisiblePosition).itemView;
+                saveAndShareImage(currentChildView);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void initData() {
         mHomeDataPresenter = new HomeDataPresenter(this);
         mHomeDataPresenter.initDatas();
@@ -141,4 +173,44 @@ public class HomeFragment extends BaseFragment implements IHomeView {
         }
     }
 
+    /**
+     * 截取当前 ViewHolder 的图片并保存到本地
+     * @param currentChildView
+     */
+    private void saveAndShareImage(final View currentChildView) {
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "分享图片", "ヽ(✿ﾟ▽ﾟ)ノ 获取图片...", true);
+        Observable.just("")
+                .subscribeOn(Schedulers.io())
+                .map(new Func1<String, String>() {
+                    @Override
+                    public String call(String s) {
+                        currentChildView.setDrawingCacheEnabled(true);
+                        currentChildView.buildDrawingCache();
+
+                        String imagePath = CapturePhotoUtils.insertImage(
+                                OneApplication.getOneApplication().getContentResolver(),
+                                currentChildView.getDrawingCache(),
+//                                ImageUtils.cropBitmapTransparency(currentChildView.getDrawingCache()),
+                                "title", "desc...");
+                        currentChildView.setDrawingCacheEnabled(false);
+                        currentChildView.destroyDrawingCache();
+
+                        return imagePath;
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String imagePath) {
+                        ShareUtils.shareImage(getContext(), Uri.parse(imagePath));
+                        progressDialog.dismiss();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        progressDialog.dismiss();
+                    }
+                });
+
+    }
 }

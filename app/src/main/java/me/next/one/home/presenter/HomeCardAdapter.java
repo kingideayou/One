@@ -89,7 +89,7 @@ public class HomeCardAdapter extends RecyclerView.Adapter<HomeCardAdapter.HomeVi
             strAuthor.setText(homeModel.getStrAuthor());
             strContent.setText(homeModel.getStrContent());
             strHpTitle.setText(homeModel.getStrHpTitle());
-            imageView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(mActivity, HomeDetailActivity.class);

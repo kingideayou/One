@@ -92,7 +92,7 @@ public class HomeDetailActivity extends AppCompatActivity {
                              startTransition();
                              return false;
                          }
-                     }).into(width, height).get();
+                     }).into(width, height);
         } catch (Exception e) {
             e.printStackTrace();
         }
