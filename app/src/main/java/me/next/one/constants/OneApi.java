@@ -5,5 +5,6 @@ package me.next.one.constants;
  */
 public class OneApi {
 
+    public static final String BASE_URL = "http://rest.wufazhuce.com/OneForWeb/one/";
     public static final String HOME_API = "http://rest.wufazhuce.com/OneForWeb/one/getHp_N";
 }

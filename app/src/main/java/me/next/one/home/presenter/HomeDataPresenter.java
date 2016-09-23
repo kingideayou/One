@@ -1,11 +1,12 @@
 package me.next.one.home.presenter;
 
-import me.next.one.constants.OneApi;
+import me.next.one.OneFactory;
+import me.next.one.home.model.ApiResponse;
 import me.next.one.home.model.HomeModel;
 import me.next.one.home.view.IHomeView;
-import me.next.one.network.OkHttpClientManager;
 import me.next.one.utils.AppLogger;
 import me.next.one.utils.TimeUtils;
+import retrofit2.Call;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -36,17 +37,13 @@ public class HomeDataPresenter implements IHomePresenter {
                     @Override
                     public HomeModel call(String s) {
                         String dateString = TimeUtils.getDateStringBeforeDays(daysBeforeToday);
-                        AppLogger.e("DateString : " + dateString);
-                        OkHttpClientManager.Param[] params = new OkHttpClientManager.Param[2];
-                        OkHttpClientManager.Param param1 =
-                                new OkHttpClientManager.Param("strDate",
-                                        dateString);
-                        OkHttpClientManager.Param param2 =
-                                new OkHttpClientManager.Param("strRow", "1");
-                        params[0] = param1;
-                        params[1] = param2;
                         try {
-                            return OkHttpClientManager.getDataByPost(OneApi.HOME_API, params, HomeModel.class);
+                            Call<ApiResponse<HomeModel>> homeModelCall = OneFactory.getOneServiceSingleton()
+                                    .getHomeModel(dateString, "1");
+                            ApiResponse<HomeModel> apiResponse = homeModelCall.execute().body();
+                            if (apiResponse.result.equals("SUCCESS")) {
+                                return apiResponse.hpEntity;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
