@@ -142,7 +142,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
             case R.id.action_share:
                 int currentVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition();
                 View currentChildView = mRecyclerView.findViewHolderForAdapterPosition(currentVisiblePosition).itemView;
-                saveAndShareImage(currentChildView);
+                saveAndShareImage(currentVisiblePosition, currentChildView);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -177,7 +177,7 @@ public class HomeFragment extends BaseFragment implements IHomeView {
      * 截取当前 ViewHolder 的图片并保存到本地
      * @param currentChildView
      */
-    private void saveAndShareImage(final View currentChildView) {
+    private void saveAndShareImage(final int position, final View currentChildView) {
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "分享图片", "ヽ(✿ﾟ▽ﾟ)ノ 获取图片...", true);
         Observable.just("")
                 .subscribeOn(Schedulers.io())
@@ -202,7 +202,8 @@ public class HomeFragment extends BaseFragment implements IHomeView {
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String imagePath) {
-                        ShareUtils.shareImage(getContext(), Uri.parse(imagePath));
+                        HomeModel homeModel = mHomeCardAdapter.getHomeModels().get(position);
+                        ShareUtils.shareImage(getContext(), Uri.parse(imagePath), homeModel.getStrContent());
                         progressDialog.dismiss();
                     }
                 }, new Action1<Throwable>() {
